@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prototipo MVP - Servicios Universitarios</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#ddd;color:#222;font-size:13px}
+.top{background:#333;color:#fff;padding:10px 16px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.top b{margin-right:10px}
+.bar{padding:10px 16px;background:#eee;display:flex;flex-wrap:wrap;gap:6px;align-items:center;border-bottom:1px solid #bbb}
+.bar .lbl{font-weight:bold;margin-right:4px}
+.tabs button{background:#fff;border:1px solid #333;padding:6px 10px;cursor:pointer}
+.tabs button.on{background:#333;color:#fff}
+.wrap{padding:16px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.cap{width:100%;max-width:1100px;font-size:12px;color:#444;border-bottom:1px solid #999;padding-bottom:3px}
+.frame{background:#fff;border:2px solid #444;border-radius:6px;overflow:hidden;width:100%}
+.dev-d{max-width:1100px}
+.dev-w{max-width:760px}
+.dev-m{max-width:375px}
+.app{display:grid;grid-template-columns:200px 1fr;min-height:480px}
+.dev-w .app{grid-template-columns:150px 1fr}
+.side{background:#e5e5e5;border-right:1px solid #999;padding:10px}
+.side>div{padding:7px 8px;border:1px solid #bbb;margin-bottom:6px;background:#fff}
+.side>div.act{background:#555;color:#fff}
+.hdr{background:#777;color:#fff;padding:8px 12px;display:flex;justify-content:space-between}
+.main{padding:12px;display:grid;gap:10px;align-content:start}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.dev-w .g3{grid-template-columns:1fr}
+.box{border:1px dashed #666;padding:10px;background:#fafafa}
+.box h4{margin:0 0 6px;font-size:13px}
+.kpi{font-size:22px;font-weight:bold}
+input,select,.ta{display:block;width:100%;border:1px solid #888;padding:6px;margin:4px 0;background:#fff;font:inherit}
+.ta{height:70px}
+button{border:1px solid #333;background:#ddd;padding:6px 10px;margin:4px 4px 4px 0;font:inherit}
+button.p{background:#333;color:#fff}
+.ov{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+td,th{border:1px solid #999;padding:5px;text-align:left;white-space:nowrap}
+th{background:#ccc}
+.bar2{height:10px;background:#ddd;border:1px solid #888;margin:3px 0 8px}
+.bar2 i{display:block;height:100%;background:#555}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal span{border:1px solid #aaa;text-align:center;padding:8px 0;background:#fff}
+.cal span.x{background:#666;color:#fff}
+.tag{display:inline-block;border:1px solid #333;padding:1px 6px;font-size:11px;border-radius:9px}
+.s{color:#666;font-size:11px}
+.row{border-bottom:1px solid #bbb;padding:7px 0}
+.bn{display:none}
+.login{min-height:420px;display:flex;align-items:center;justify-content:center;background:#f4f4f4;padding:16px}
+.login .box{width:300px;background:#fff}
+/* Móvil */
+.dev-m .app{grid-template-columns:1fr;min-height:560px}
+.dev-m .side{display:none}
+.dev-m .bn{display:flex;justify-content:space-around;border-top:1px solid #999;padding:8px 4px;background:#e5e5e5;gap:4px}
+.dev-m .bn span{font-size:10px;text-align:center;flex:1}
+.dev-m .g2,.dev-m .g3{grid-template-columns:1fr}
+.dev-m .main{padding:8px}
+.dev-m table{font-size:11px}
+.dev-m .cal{gap:2px}
+</style>
+</head>
+<body>
+<div class="top"><b>Prototipo MVP · Servicios Universitarios</b><span class="s" style="color:#ccc">Escala de grises · baja fidelidad</span></div>
+<div class="bar">
+  <span class="lbl">Incremento:</span>
+  <span class="tabs" id="ti"></span>
+  <span class="lbl" style="margin-left:14px">Dispositivo:</span>
+  <span class="tabs" id="td"></span>
+</div>
+<div class="wrap" id="out"></div>
+
+<script>
+let inc=1, D='dev-d';
+const M1=["Inicio","Nueva solicitud","Mis solicitudes","Reservas","Notificaciones"];
+const M2=["Bandeja","Solicitudes","Reservas","Notificaciones","Indicadores"];
+const M3=["Indicadores","Reglas","Reportes","Bandeja"];
+const B=t=>`<button>${t}</button>`;
+const P=t=>`<button class="p">${t}</button>`;
+const Box=(t,b)=>`<div class="box"><h4>${t}</h4>${b}</div>`;
+const Tb=(h,r)=>`<div class="ov"><table><tr>${h.map(x=>`<th>${x}</th>`).join('')}</tr>${r.map(q=>`<tr>${q.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</table></div>`;
+const Cal=()=>`<div class="cal">${Array.from({length:14},(_,k)=>`<span class="${[2,5,9].includes(k)?'x':''}">${k+20}</span>`).join('')}</div>`;
+const Bars=(items)=>items.map(([n,v])=>`<div>${n}<div class="bar2"><i style="width:${v}%"></i></div></div>`).join('');
+const Sh=(m,a,c)=>`<div class="app"><div class="side">${m.map(x=>`<div class="${x===a?'act':''}">${x}</div>`).join('')}</div><div><div class="hdr"><span>Servicios Universitarios</span><span>Sesión iniciada</span></div><div class="main">${c}</div></div></div><div class="bn">${m.map(x=>`<span>${x===a?'[■]':'[ ]'}<br>${x}</span>`).join('')}</div>`;
+
+const S=[
+{i:1,t:"Inicio de sesión institucional",c:()=>`<div class="box"><h4>Acceso institucional</h4><input placeholder="Correo institucional"><input placeholder="Contraseña">${P("Ingresar")}<p class="s">Autenticación con credenciales de la universidad</p></div>`},
+{i:1,t:"Inicio del estudiante",m:M1,a:"Inicio",c:()=>`<div class="g2">${Box("Mis trámites activos",Tb(["Folio","Tipo","Estado","Actualizado"],[["SOL-1042","Constancia de estudios","En revisión","26/10"],["SOL-1038","Beca socioeconómica","Doc. pendiente","24/10"],["SOL-1029","Asesoría académica","Aprobada","20/10"]]))}${Box("Accesos rápidos",B("Nueva solicitud")+B("Reservar espacio")+B("Consultar beca")+B("Orientación"))}</div>`},
+{i:1,t:"Nueva solicitud",m:M1,a:"Nueva solicitud",c:()=>`<div class="g2">${Box("Datos de la solicitud",`<select><option>Tipo: Académico / Administrativo / Bienestar</option></select><select><option>Trámite</option></select><input placeholder="Asunto"><div class="ta" style="height:90px"></div>`)}${Box("Evidencias adjuntas",`<div class="box" style="height:130px;text-align:center;padding-top:50px">Arrastrar archivos o seleccionar</div><p class="s">PDF, JPG · máx. 10 MB</p>`)}</div><div>${P("Enviar solicitud")}${B("Cancelar")}</div>`},
+{i:2,t:"Disponibilidad de espacios",m:M1,a:"Reservas",c:()=>`<div class="g2">${Box("Filtros",`<select><option>Laboratorio / Sala de estudio / Cubículo</option></select><input placeholder="Fecha"><p class="s">Octubre 2026</p>${Cal()}`)}${Box("Horarios disponibles",Tb(["Espacio","Horario","Estado","Acción"],[["Lab. 3","08:00–10:00","Libre",B("Reservar")],["Cubículo 2","10:00–11:00","Ocupado","—"],["Sala 1","11:00–13:00","Libre",B("Reservar")]]))}</div>`},
+{i:2,t:"Confirmar reserva",m:M1,a:"Reservas",c:()=>`<div class="g2">${Box("Resumen",`<div class="row">Espacio: Laboratorio 3</div><div class="row">Fecha: 28/10/2026</div><div class="row">Horario: 08:00–10:00</div><div class="row">Propósito: <div class="ta" style="height:40px"></div></div>`)}${Box("Confirmación",`<p>Recibirás notificación de confirmación y recordatorio 1 h antes.</p>${P("Confirmar reserva")}${B("Cancelar")}`)}</div>`},
+{i:3,t:"Bandeja de atención",m:M2,a:"Bandeja",c:()=>`<div class="g3"><select><option>Área: todas</option></select><select><option>Prioridad</option></select><input placeholder="Vence antes de"></div>${Box("Solicitudes asignadas por área, prioridad y vencimiento",Tb(["Folio","Área","Prioridad","Vence","Estado","Responsable"],[["SOL-1042","Registro","Alta","27/10","En revisión","—"],["SOL-1038","Becas","Alta","25/10 <span class='tag'>Vencida</span>","Pendiente","M. Ruiz"],["SOL-1047","Bienestar","Media","30/10","Nueva","—"],["SOL-1050","Registro","Baja","05/11","Nueva","—"]]))}`},
+{i:3,t:"Detalle y gestión de solicitud",m:M2,a:"Solicitudes",c:()=>`<div class="g2">${Box("Solicitud SOL-1038",`<div class="row">Estudiante: (datos protegidos por rol)</div><div class="row">Tipo: Beca socioeconómica</div><div class="row">Historial: Recibida → Asignada → Doc. pendiente</div><div class="ta" style="height:60px"></div>`)}${Box("Gestión",`<select><option>Estado: Pendiente / En revisión / Aprobada / Rechazada</option></select><input placeholder="Responsable"><div class="ta"></div><div>${P("Guardar")}${B("Aprobar")}${B("Rechazar")}${B("Solicitar documento")}</div>`)}</div>`},
+{i:3,t:"Notificaciones y alertas",m:M2,a:"Notificaciones",c:()=>`<div class="g2">${Box("Notificaciones recientes",`<div class="row">✔ Solicitud SOL-1029 aprobada · hace 2 h</div><div class="row">! Documento pendiente: carta de ingresos · SOL-1038</div><div class="row">◷ Cita programada: 28/10 10:00 · Cubículo 2</div><div class="row">✎ Solicitud de calificación · SOL-1029</div>`)}${Box("Preferencias de aviso",`<p>☑ Correo institucional<br>☑ Notificación en app<br>☐ SMS</p>`)}</div>`},
+{i:4,t:"Panel de indicadores",m:M3,a:"Indicadores",c:()=>`<div><select style="width:240px"><option>Periodo: Otoño 2026</option></select></div><div class="g3">${Box("Solicitudes del periodo",`<div class="kpi">1,284</div><p class="s">Volumen total</p>`)}${Box("Tiempo medio de respuesta",`<div class="kpi">2.4 días</div><p class="s">Meta: 2 días</p>`)}${Box("Satisfacción",`<div class="kpi">4.2 / 5</div><p class="s">Calificaciones recibidas</p>`)}</div><div class="g2">${Box("Demanda por servicio",Bars([["Constancias",80],["Becas",65],["Reservas",45],["Orientación",30]]))}${Box("Congestión por área",Bars([["Registro",90],["Becas",75],["Bienestar",40]]))}</div>`},
+{i:4,t:"Reglas de priorización",m:M3,a:"Reglas",c:()=>`${Box("Reglas activas",Tb(["Tipo de trámite","Condición de urgencia","Periodo académico","Prioridad"],[["Becas","Vence en menos de 3 días","Inscripciones","Alta"],["Constancias","—","Cualquiera","Media"],["Reservas","Sin cita previa","Exámenes","Alta"]]))}<div>${B("Agregar regla")}${P("Guardar cambios")}</div>`},
+{i:4,t:"Reportes de tiempos de respuesta",m:M3,a:"Reportes",c:()=>`<div class="g2">${Box("Parámetros",`<input placeholder="Fecha inicio"><input placeholder="Fecha fin"><select><option>Área: todas</option></select><div>${B("Exportar PDF")}${B("Exportar Excel")}${P("Generar")}</div>`)}${Box("Vista previa",Tb(["Área","Solicitudes","Tiempo medio","Vencidas"],[["Registro","520","3.1 días","12"],["Becas","310","2.8 días","9"],["Bienestar","154","1.9 días","2"]]))}</div>`},
+{i:4,t:"Calificar la atención recibida",m:M1,a:"Mis solicitudes",c:()=>`${Box("Calificar atención · SOL-1029",`<p class="s">Atendido por: Registro Académico</p><div>${[1,2,3,4,5].map(n=>B("☆ "+n)).join('')}</div><div class="ta" style="height:80px"></div>${P("Enviar calificación")}`)}`}
+];
+
+function render(){
+  document.getElementById('ti').innerHTML=[1,2,3,4].map(n=>`<button class="${n===inc?'on':''}" onclick="inc=${n};render()">Incremento ${n}</button>`).join('');
+  const dv=[['dev-d','Escritorio'],['dev-w','Web / tableta'],['dev-m','Móvil']];
+  document.getElementById('td').innerHTML=dv.map(([k,l])=>`<button class="${k===D?'on':''}" onclick="D='${k}';render()">${l}</button>`).join('');
+  const names=["Incremento 1: Servicios básicos y base","Incremento 2: Reservación y sincronización","Incremento 3: Gestión administrativa y notificaciones","Incremento 4: Métricas, seguridad y estabilidad"];
+  const list=S.filter(s=>s.i===inc);
+  document.getElementById('out').innerHTML=`<div class="cap"><b>${names[inc-1]}</b> · ${list.length} pantallas · vista: ${dv.find(d=>d[0]===D)[1]}</div>`+
+    list.map((s,k)=>`<div class="cap" style="border:0;padding:0;margin-top:10px"><b>${inc}.${k+1}</b> ${s.t}</div><div class="frame ${D}">${s.m?Sh(s.m,s.a,s.c()):`<div class="login">${s.c()}</div>`}</div>`).join('');
+}
+render();
+</script>
+</body>
+</html>
